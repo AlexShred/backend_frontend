@@ -2,6 +2,36 @@ from datetime import date
 
 from django.core.exceptions import ValidationError
 from django.db import models
+import us
+
+
+class City(models.Model):
+    name = models.CharField(max_length=255)
+    state = models.ForeignKey('State', on_delete=models.CASCADE)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{self.name}, {self.state.state_code}"
+
+
+class PickupCity(City):
+    def __str__(self):
+        return f"{self.name}, {self.state.state_code} (Pickup City)"
+
+
+class DeliveryCity(City):
+    def __str__(self):
+        return f"{self.name}, {self.state.state_code} (Delivery City)"
+
+
+class State(models.Model):
+    state_code = models.CharField(max_length=2, unique=True)
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
 
 
 class Truck(models.Model):
@@ -37,8 +67,8 @@ class Load(models.Model):
     cargo = models.CharField(max_length=50)
     pickup_date = models.DateField(default=date.today)
     delivery_date = models.DateField()
-    pickup_city = models.CharField(max_length=50, choices=(("Alabama","Alabama"),("Alaska","Alaska"),("Arizona","Arizona"),("Arkansas","Arkansas"),("California","California"),("Colorado","Colorado"),("Connecticut","Connecticut"),("Delaware","Delaware"),("Florida","Florida"),("Georgia","Georgia"),("Hawaii","Hawaii"),("Idaho","Idaho"),("Illinois","Illinois"),("Indiana","Indiana"),("Iowa","Iowa"),("Kansas","Kansas"),("Kentucky","Kentucky"),("Louisiana","Louisiana"),("Maine","Maine"),("Maryland","Maryland"),("Massachusetts","Massachusetts"),("Michigan","Michigan"),("Minnesota","Minnesota"),("Mississippi","Mississippi"),("Missouri","Missouri"),("Montana","Montana"),("Nebraska","Nebraska"),("Nevada","Nevada"),("New Hampshire","New Hampshire"),("New Jersey","New Jersey"),("New Mexico","New Mexico"),("New York","New York"),("North Carolina","North Carolina"),("North Dakota","North Dakota"),("Ohio","Ohio"),("Oklahoma","Oklahoma"),("Oregon","Oregon"),("Pennsylvania","Pennsylvania"),("Rhode Island","Rhode Island"),("South Carolina","South Carolina"),("South Dakota","South Dakota"),("Tennessee","Tennessee"),("Texas","Texas"),("Utah","Utah"),("Vermont","Vermont"),("Virginia","Virginia"),("Washington","Washington"),("West Virginia","West Virginia"),("Wisconsin","Wisconsin"),("Wyoming","Wyoming")))
-    delivery_city = models.CharField(max_length=50, choices=(("Alabama","Alabama"),("Alaska","Alaska"),("Arizona","Arizona"),("Arkansas","Arkansas"),("California","California"),("Colorado","Colorado"),("Connecticut","Connecticut"),("Delaware","Delaware"),("Florida","Florida"),("Georgia","Georgia"),("Hawaii","Hawaii"),("Idaho","Idaho"),("Illinois","Illinois"),("Indiana","Indiana"),("Iowa","Iowa"),("Kansas","Kansas"),("Kentucky","Kentucky"),("Louisiana","Louisiana"),("Maine","Maine"),("Maryland","Maryland"),("Massachusetts","Massachusetts"),("Michigan","Michigan"),("Minnesota","Minnesota"),("Mississippi","Mississippi"),("Missouri","Missouri"),("Montana","Montana"),("Nebraska","Nebraska"),("Nevada","Nevada"),("New Hampshire","New Hampshire"),("New Jersey","New Jersey"),("New Mexico","New Mexico"),("New York","New York"),("North Carolina","North Carolina"),("North Dakota","North Dakota"),("Ohio","Ohio"),("Oklahoma","Oklahoma"),("Oregon","Oregon"),("Pennsylvania","Pennsylvania"),("Rhode Island","Rhode Island"),("South Carolina","South Carolina"),("South Dakota","South Dakota"),("Tennessee","Tennessee"),("Texas","Texas"),("Utah","Utah"),("Vermont","Vermont"),("Virginia","Virginia"),("Washington","Washington"),("West Virginia","West Virginia"),("Wisconsin","Wisconsin"),("Wyoming","Wyoming")))
+    pickup_city = models.ForeignKey(PickupCity, on_delete=models.CASCADE)
+    delivery_city = models.ForeignKey(DeliveryCity, on_delete=models.CASCADE)
     trip = models.CharField(max_length=50)
     company = models.CharField(max_length=50)
     contact_number_ex = models.CharField(max_length=50)
